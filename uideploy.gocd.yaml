@@ -29,12 +29,6 @@ pipelines:
                - ubuntu-agent
               tasks:
                 - exec:
-                    command: sudo
-                    arguments:
-                      - mkdir
-                      - -p
-                      - /var/www/html/prime-square
-                - exec:
                       command: sudo
                       arguments:
                         - /bin/systemctl
