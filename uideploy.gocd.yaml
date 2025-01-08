@@ -31,7 +31,7 @@ pipelines:
                 SFTP_USER: ubuntu
                 SFTP_KEY_PATH: /var/go/.ssh/id_rsa
                 SFTP_DIR: /home/ubuntu
-                GOCD_DIR: /home/ubuntu
+                GOCD_DIR: /var/go
                 APP_SERVER_BUILD_DIR: /home/ubuntu/builds/ui
                 APP_SERVER_TARGET_DIR: /var/www/html/prime-square
               tasks:
