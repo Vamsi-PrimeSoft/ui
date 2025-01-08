@@ -14,7 +14,7 @@ pipelines:
         branch: main
         encrypted_password: AES:CvqRgCac0f8DmOI58hCnLA==:lMJcCvSj3nsKR5i/qjAJUA==
     parameters:
-      baseUiUrl: ""
+      baseUiUrl: "192.168.56.126"
     stages:
       - Deploy-Frontend:
           fetch_materials: true
