@@ -61,16 +61,6 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa go@192.168.56.126 <<EOF
-                        put ${GOCD_DIR}/*.zip ${APP_SERVER_BUILD_DIR}/
-                        bye
-                        EOF
-                - exec:
-                    command: bash
-                    arguments:
-                      - -c
-                      - |
-                        ssh -i /var/go/.ssh/id_rsa ubuntu@${APP_SERVER} <<EOF
                         sudo mkdir -p ${APP_SERVER_TARGET_DIR}
                         sudo chown ubuntu:ubuntu ${APP_SERVER_BUILD_DIR}/*.zip
                         sudo unzip -o ${APP_SERVER_BUILD_DIR}/*.zip -d ${APP_SERVER_TARGET_DIR}
