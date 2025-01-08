@@ -40,7 +40,7 @@ pipelines:
                     arguments:
                       - mkdir
                       - -p
-                      - ${GOCD_DIR}
+                      - ${APP_SERVER_TARGET_DIR}
                 - exec:
                     command: sudo
                     arguments:
@@ -61,9 +61,8 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        sudo mkdir -p ${APP_SERVER_TARGET_DIR}
-                        sudo chown ubuntu:ubuntu ${APP_SERVER_BUILD_DIR}/*.zip
-                        sudo unzip -o ${APP_SERVER_BUILD_DIR}/*.zip -d ${APP_SERVER_TARGET_DIR}
+                        sudo chown ubuntu:ubuntu /var/go/*.zip
+                        sudo unzip -o /var/go/*.zip -d /var/www/html/prime-square
                         EOF
                 - exec:
                     command: echo
