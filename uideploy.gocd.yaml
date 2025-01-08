@@ -25,22 +25,19 @@ pipelines:
               timeout: 0
               resources:
                - ubuntu-agent
-              variables:
-                SFTP_SERVER: 172.16.7.121
-                APP_SERVER: 192.168.56.126
-                SFTP_USER: ubuntu
-                SFTP_KEY_PATH: /var/go/.ssh/id_rsa
-                SFTP_DIR: /home/ubuntu
-                GOCD_DIR: /home/ubuntu
-                APP_SERVER_BUILD_DIR: /var/go
-                APP_SERVER_TARGET_DIR: /var/www/html/prime-square
               tasks:
                 - exec:
                     command: sudo
                     arguments:
                       - mkdir
                       - -p
-                      - ${APP_SERVER_TARGET_DIR}
+                      - /var/www/html/prime-square
+                - exec:
+                      command: sudo
+                      arguments:
+                        - /bin/systemctl
+                        - stop
+                        - apache2.service
                 - exec:
                     command: bash
                     arguments:
@@ -57,6 +54,12 @@ pipelines:
                       - |
                         sudo chown ubuntu:ubuntu /var/go/*.zip
                         sudo unzip -o /var/go/*.zip -d /var/www/html/prime-square
+                - exec:
+                      command: sudo
+                      arguments:
+                        - /bin/systemctl
+                        - restart
+                        - apache2.service
                 - exec:
                     command: echo
                     arguments:
