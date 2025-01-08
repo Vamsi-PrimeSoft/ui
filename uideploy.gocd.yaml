@@ -42,12 +42,6 @@ pipelines:
                       - -p
                       - ${APP_SERVER_TARGET_DIR}
                 - exec:
-                    command: sudo
-                    arguments:
-                      - chown
-                      - go:go
-                      - ${GOCD_DIR}
-                - exec:
                     command: bash
                     arguments:
                       - -c
