@@ -13,6 +13,8 @@ pipelines:
         auto_update: true
         branch: main
         encrypted_password: AES:CvqRgCac0f8DmOI58hCnLA==:lMJcCvSj3nsKR5i/qjAJUA==
+    parameters:
+      baseUiUrl: ""
     stages:
       - Deploy-Frontend:
           fetch_materials: true
@@ -54,6 +56,14 @@ pipelines:
                       - |
                         sudo chown ubuntu:ubuntu /var/go/*.zip
                         sudo unzip -o /var/go/*.zip -d /var/www/html/prime-square
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        sudo sed -i "s/ps-targethost:3804/${baseUiUrl}/g" /var/www/html/prime-square/main*.js
+                        sudo sed -i "s/ps-targethost:3804/${baseUiUrl}/g" /var/www/html/prime-square/assets/environment/environment.json
+
                 - exec:
                       command: sudo
                       arguments:
