@@ -52,7 +52,7 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        sftp -o StrictHostKeyChecking=no -i ${SFTP_KEY_PATH} ${SFTP_USER}@${SFTP_SERVER} <<EOF
+                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ubuntu@172.16.7.121 <<EOF
                         get ${SFTP_DIR}/*.zip ${GOCD_DIR}/
                         bye
                         EOF
@@ -61,7 +61,7 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        sftp -o StrictHostKeyChecking=no -i ${SFTP_KEY_PATH} ${SFTP_USER}@${APP_SERVER} <<EOF
+                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa go@192.168.56.126 <<EOF
                         put ${GOCD_DIR}/*.zip ${APP_SERVER_BUILD_DIR}/
                         bye
                         EOF
@@ -70,7 +70,7 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        ssh -i ${SFTP_KEY_PATH} ${SFTP_USER}@${APP_SERVER} <<EOF
+                        ssh -i /var/go/.ssh/id_rsa ubuntu@${APP_SERVER} <<EOF
                         sudo mkdir -p ${APP_SERVER_TARGET_DIR}
                         sudo chown ubuntu:ubuntu ${APP_SERVER_BUILD_DIR}/*.zip
                         sudo unzip -o ${APP_SERVER_BUILD_DIR}/*.zip -d ${APP_SERVER_TARGET_DIR}
