@@ -55,8 +55,8 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        sudo sed -i "s/ps-targethost:3804/${baseUiUrl}/g" /var/www/html/prime-square/main*.js
-                        sudo sed -i "s/ps-targethost:3804/${baseUiUrl}/g" /var/www/html/prime-square/assets/environment/environment.json
+                        sudo sed -i "s/ps-targethost:3804/192.168.56.126/g" /var/www/html/prime-square/main*.js
+                        sudo sed -i "s/ps-targethost:3804/192.168.56.126/g" /var/www/html/prime-square/assets/environment/environment.json
 
                 - exec:
                       command: sudo
