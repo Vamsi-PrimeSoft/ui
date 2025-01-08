@@ -24,7 +24,7 @@ pipelines:
             run-commands:
               timeout: 0
               resources:
-               - ubuntu-agent
+                - ubuntu-agent
               variables:
                 BUILD_DIR: /home/ubuntu/builds
                 UI_TARGET_DIR: /var/www/html
@@ -76,6 +76,16 @@ pipelines:
                         export UI_ARCHIVE_DIR=/home/ubuntu/ui-archive
                         export UI_TEMP_DIR=${UI_ARCHIVE_DIR}/temp-extract
 
+                        echo "Ensuring necessary directories exist..."
+                        for DIR in "${BUILD_DIR}" "${UI_ARCHIVE_DIR}" "${UI_TARGET_DIR}"; do
+                          if [ ! -d "${DIR}" ]; then
+                            echo "Directory ${DIR} does not exist. Creating it..."
+                            mkdir -p "${DIR}" || { echo "Failed to create directory ${DIR}"; exit 1; }
+                          else
+                            echo "Directory ${DIR} already exists."
+                          fi
+                        done
+
                         echo "Checking build directory contents..."
                         ls -lh ${BUILD_DIR}
 
@@ -87,13 +97,12 @@ pipelines:
                         fi
 
                         echo "Found frontend zip: ${UI_ZIP}"
-                        mkdir -p "${UI_TEMP_DIR}" "${UI_ARCHIVE_DIR}" || { echo "Failed to create frontend directories"; exit 1; }
+                        mkdir -p "${UI_TEMP_DIR}" || { echo "Failed to create temp directory"; exit 1; }
                         unzip -o "${UI_ZIP}" -d "${UI_TEMP_DIR}" || { echo "Failed to unzip ps_ui"; exit 1; }
 
                         echo "Copying files to ${UI_TARGET_DIR}..."
                         cp -R "${UI_TEMP_DIR}"/* "${UI_TARGET_DIR}" || { echo "Failed to copy UI files"; exit 1; }
-                        rm -rf "${UI_TEMP_DIR}" || { echo "Failed to clean up UI temp dir"; exit 1; }
-
+                        rm -rf "${UI_TEMP_DIR}" || { echo "Failed to clean up temp directory"; exit 1; }
                         echo "Frontend deployment complete."
               environment_variables:
                 GOCD_ENVIRONMENT: FrontendEnvironment
