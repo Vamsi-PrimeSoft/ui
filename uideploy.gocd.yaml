@@ -53,7 +53,7 @@ pipelines:
                       - -c
                       - |
                         sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ubuntu@172.16.7.121 <<EOF
-                        get ${SFTP_DIR}/*.zip ${GOCD_DIR}/
+                        get /home/ubuntu/*.zip /home/ubuntu
                         bye
                         EOF
                 - exec:
