@@ -26,83 +26,56 @@ pipelines:
               resources:
                - ubuntu-agent
               variables:
-                BUILD_DIR: /home/ubuntu/builds
-                UI_TARGET_DIR: /var/www/html
-                UI_ARCHIVE_DIR: /home/ubuntu/ui-archive
-                UI_TEMP_DIR: ${UI_ARCHIVE_DIR}/temp-extract
+                SFTP_SERVER: 172.16.7.121
+                APP_SERVER: 192.168.56.126
+                SFTP_USER: ubuntu
+                SFTP_KEY_PATH: /var/go/.ssh/id_rsa
+                SFTP_DIR: /home/ubuntu
+                GOCD_DIR: /home/ubuntu
+                APP_SERVER_BUILD_DIR: /home/ubuntu/builds/ui
+                APP_SERVER_TARGET_DIR: /var/www/html/prime-square
               tasks:
                 - exec:
                     command: sudo
                     arguments:
                       - mkdir
                       - -p
-                      - /home/ubuntu/prime-square
+                      - ${GOCD_DIR}
                 - exec:
                     command: sudo
                     arguments:
                       - chown
                       - go:go
-                      - /home/ubuntu/prime-square
+                      - ${GOCD_DIR}
                 - exec:
                     command: bash
                     arguments:
                       - -c
                       - |
-                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ubuntu@172.16.7.121 <<EOF
-                        ls /home/ubuntu/
-                        get /home/ubuntu/*.zip /home/ubuntu/prime-square/
+                        sftp -o StrictHostKeyChecking=no -i ${SFTP_KEY_PATH} ${SFTP_USER}@${SFTP_SERVER} <<EOF
+                        get ${SFTP_DIR}/*.zip ${GOCD_DIR}/
                         bye
                         EOF
                 - exec:
-                    command: ls
-                    arguments:
-                      - -l
-                      - /home/ubuntu/prime-square
-                - exec:
-                    command: sudo
-                    arguments:
-                      - chown
-                      - -R
-                      - ubuntu:ubuntu
-                      - /home/ubuntu/prime-square
-                - exec:
-                    command: /bin/bash
+                    command: bash
                     arguments:
                       - -c
                       - |
-                        echo "Exporting environment variables..."
-                        export BUILD_DIR=/home/ubuntu/builds
-                        export UI_TARGET_DIR=/var/www/html
-                        export UI_ARCHIVE_DIR=/home/ubuntu/ui-archive
-                        export UI_TEMP_DIR=${UI_ARCHIVE_DIR}/temp-extract
-
-                        echo "Ensuring necessary directories exist..."
-                        for DIR in "${BUILD_DIR}" "${UI_ARCHIVE_DIR}" "${UI_TARGET_DIR}"; do
-                          if [ ! -d "${DIR}" ]; then
-                            echo "Directory ${DIR} does not exist. Creating it..."
-                            sudo mkdir -p "${DIR}" || { echo "Failed to create directory ${DIR}"; exit 1; }
-                          else
-                            echo "Directory ${DIR} already exists."
-                          fi
-                        done
-
-                        echo "Checking build directory contents..."
-                        ls -lh ${BUILD_DIR}
-
-                        echo "Processing frontend (ps_ui)..."
-                        UI_ZIP=$(ls ${BUILD_DIR}/ps_ui*.zip 2>/dev/null | head -n 1)
-                        if [ -z "${UI_ZIP}" ]; then
-                          echo "No ps_ui zip file found in ${BUILD_DIR}!"
-                          exit 1
-                        fi
-
-                        echo "Found frontend zip: ${UI_ZIP}"
-                        sudo mkdir -p "${UI_TEMP_DIR}" || { echo "Failed to create temp directory"; exit 1; }
-                        unzip -o "${UI_ZIP}" -d "${UI_TEMP_DIR}" || { echo "Failed to unzip ps_ui"; exit 1; }
-
-                        echo "Copying files to ${UI_TARGET_DIR}..."
-                        sudo cp -R "${UI_TEMP_DIR}"/* "${UI_TARGET_DIR}" || { echo "Failed to copy UI files"; exit 1; }
-                        sudo rm -rf "${UI_TEMP_DIR}" || { echo "Failed to clean up temp directory"; exit 1; }
-                        echo "Frontend deployment complete."
-                environment_variables:
-                  GOCD_ENVIRONMENT: FrontendEnvironment
+                        sftp -o StrictHostKeyChecking=no -i ${SFTP_KEY_PATH} ${SFTP_USER}@${APP_SERVER} <<EOF
+                        put ${GOCD_DIR}/*.zip ${APP_SERVER_BUILD_DIR}/
+                        bye
+                        EOF
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        ssh -i ${SFTP_KEY_PATH} ${SFTP_USER}@${APP_SERVER} <<EOF
+                        sudo mkdir -p ${APP_SERVER_TARGET_DIR}
+                        sudo chown ubuntu:ubuntu ${APP_SERVER_BUILD_DIR}/*.zip
+                        sudo unzip -o ${APP_SERVER_BUILD_DIR}/*.zip -d ${APP_SERVER_TARGET_DIR}
+                        EOF
+                - exec:
+                    command: echo
+                    arguments:
+                      - "Frontend deployment complete."
