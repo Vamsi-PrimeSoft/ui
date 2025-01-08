@@ -1,0 +1,99 @@
+format_version: 10
+pipelines:
+  UI-CD-YAML:
+    group: defaultGroup
+    label_template: ${COUNT}
+    lock_behavior: none
+    display_order: -1
+    materials:
+      git-878c2de:
+        git: https://github.com/Vamsi-PrimeSoft/ui.git
+        username: Vamsi-PrimeSoft
+        shallow_clone: false
+        auto_update: true
+        branch: main
+        encrypted_password: AES:CvqRgCac0f8DmOI58hCnLA==:lMJcCvSj3nsKR5i/qjAJUA==
+    stages:
+      - Deploy-Frontend:
+          fetch_materials: true
+          keep_artifacts: false
+          clean_workspace: false
+          approval:
+            type: manual
+          jobs:
+            run-commands:
+              timeout: 0
+              resources:
+               - ubuntu-agent
+              variables:
+                BUILD_DIR: /home/ubuntu/builds
+                UI_TARGET_DIR: /var/www/html
+                UI_ARCHIVE_DIR: /home/ubuntu/ui-archive
+                UI_TEMP_DIR: ${UI_ARCHIVE_DIR}/temp-extract
+              tasks:
+                - exec:
+                    command: sudo
+                    arguments:
+                      - mkdir
+                      - -p
+                      - /home/ubuntu/prime-square
+                - exec:
+                    command: sudo
+                    arguments:
+                      - chown
+                      - go:go
+                      - /home/ubuntu/prime-square
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ubuntu@172.16.7.121 <<EOF
+                        ls /home/ubuntu/
+                        get /home/ubuntu/*.zip /home/ubuntu/prime-square/
+                        bye
+                        EOF
+                - exec:
+                    command: ls
+                    arguments:
+                      - -l
+                      - /home/ubuntu/prime-square
+                - exec:
+                    command: sudo
+                    arguments:
+                      - chown
+                      - -R
+                      - ubuntu:ubuntu
+                      - /home/ubuntu/prime-square
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "Exporting environment variables..."
+                        export BUILD_DIR=/home/ubuntu/builds
+                        export UI_TARGET_DIR=/var/www/html
+                        export UI_ARCHIVE_DIR=/home/ubuntu/ui-archive
+                        export UI_TEMP_DIR=${UI_ARCHIVE_DIR}/temp-extract
+
+                        echo "Checking build directory contents..."
+                        ls -lh ${BUILD_DIR}
+
+                        echo "Processing frontend (ps_ui)..."
+                        UI_ZIP=$(ls ${BUILD_DIR}/ps_ui*.zip 2>/dev/null | head -n 1)
+                        if [ -z "${UI_ZIP}" ]; then
+                          echo "No ps_ui zip file found in ${BUILD_DIR}!"
+                          exit 1
+                        fi
+
+                        echo "Found frontend zip: ${UI_ZIP}"
+                        mkdir -p "${UI_TEMP_DIR}" "${UI_ARCHIVE_DIR}" || { echo "Failed to create frontend directories"; exit 1; }
+                        unzip -o "${UI_ZIP}" -d "${UI_TEMP_DIR}" || { echo "Failed to unzip ps_ui"; exit 1; }
+
+                        echo "Copying files to ${UI_TARGET_DIR}..."
+                        cp -R "${UI_TEMP_DIR}"/* "${UI_TARGET_DIR}" || { echo "Failed to copy UI files"; exit 1; }
+                        rm -rf "${UI_TEMP_DIR}" || { echo "Failed to clean up UI temp dir"; exit 1; }
+
+                        echo "Frontend deployment complete."
+              environment_variables:
+                GOCD_ENVIRONMENT: FrontendEnvironment
