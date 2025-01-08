@@ -49,7 +49,7 @@ pipelines:
                       - -c
                       - |
                         sudo chown ubuntu:ubuntu /var/go/*.zip
-                        sudo unzip -o /var/go/*.zip -d /var/www/html/prime-square
+                        sudo unzip -o /var/go/*.zip -d /var/www/html
                 - exec:
                     command: bash
                     arguments:
