@@ -71,17 +71,21 @@ pipelines:
                       - |
                         echo "[INFO] Downloading artifacts from SFTP..."
                         echo "[DEBUG] SFTP_HOST=${SFTP_HOST}, SFTP_USER=${SFTP_USER}, SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}, LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}"
+                        
                         # Check if variables are correctly set
                         if [[ -z "${SFTP_HOST}" || -z "${SFTP_USER}" || -z "${SFTP_REMOTE_PATH}" || -z "${LOCAL_DOWNLOAD_PATH}" ]]; then
                           echo "[ERROR] One or more required environment variables are not set."
                           exit 1
                         fi
+                        
                         sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa "${SFTP_USER}@${SFTP_HOST}" <<EOF
                         get "${SFTP_REMOTE_PATH}"/*.zip "${LOCAL_DOWNLOAD_PATH}"
                         bye
                         EOF
+                        
                         if [ $? -ne 0 ]; then
-                          echo "[ERROR] Failed to download artifacts from SFTP"; exit 1;
+                          echo "[ERROR] Failed to download artifacts from SFTP"
+                          exit 1
                         fi
                 - exec:
                     command: bash
@@ -94,7 +98,8 @@ pipelines:
                         sudo unzip -o ${LOCAL_DOWNLOAD_PATH}/*.zip -d ${UNZIP_DESTINATION}
                         sudo mv ${LOCAL_DOWNLOAD_PATH}/*.zip /home/ubuntu/ui-archive
                         if [ $? -ne 0 ]; then
-                          echo "[ERROR] Failed to unzip artifacts"; exit 1;
+                          echo "[ERROR] Failed to unzip artifacts"
+                          exit 1
                         fi
                 - exec:
                     command: bash
@@ -105,7 +110,8 @@ pipelines:
                         sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/main*.js
                         sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/assets/environment/environment.json
                         if [ $? -ne 0 ]; then
-                          echo "[ERROR] Failed to update environment configurations"; exit 1;
+                          echo "[ERROR] Failed to update environment configurations"
+                          exit 1
                         fi
                 - exec:
                     command: sudo
