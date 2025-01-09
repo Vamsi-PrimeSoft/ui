@@ -104,13 +104,3 @@ pipelines:
                     command: echo
                     arguments:
                       - "Frontend deployment complete."
-                - exec:
-                    command: curl
-                    arguments:
-                      - -X
-                      - POST
-                      - -H
-                      - "Content-Type: application/json"
-                      - -d
-                      - '{"text": "Frontend deployment complete in '${TARGET_ENVIRONMENT}' environment."}'
-                      - https://hooks.slack.com/services/TOKEN
