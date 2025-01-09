@@ -29,6 +29,32 @@ pipelines:
       fileOwner: "ubuntu:ubuntu"
       targetHost: "192.168.56.126"
     stages:
+      - Environment-Connectivity-Test:
+          fetch_materials: false
+          keep_artifacts: false
+          clean_workspace: false
+          approval:
+            type: manual
+          jobs:
+            connectivity-check:
+              timeout: 0
+              resources:
+               - ubuntu-agent
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "Checking OS release:"
+                        cat /etc/os-release
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "Checking hostname:"
+                        hostname
       - Deploy-Frontend:
           fetch_materials: true
           keep_artifacts: false
