@@ -55,7 +55,7 @@ pipelines:
                         - stop
                         - apache2.service
                 - exec:
-                      command: bash
+                      command: /bin/bash
                       arguments:
                         - -c
                         - |
