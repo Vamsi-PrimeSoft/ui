@@ -16,7 +16,6 @@ pipelines:
     parameters:
       sftpHost: "172.16.7.121"
       sftpUser: "ubuntu"
-      sftpKeyPath: "/var/go/.ssh/id_rsa"
       sftpRemotePath: "/home/ubuntu/*.zip"
       localDownloadPath: "/var/go"
       unzipDestination: "/var/www/html"
@@ -60,10 +59,10 @@ pipelines:
                       arguments:
                         - -c
                         - |
-                          sftp -o StrictHostKeyChecking=no -i ${SFTP_KEY_PATH} ${SFTP_USER}@${SFTP_HOST} <<EOF
-                get ${SFTP_REMOTE_PATH} ${LOCAL_DOWNLOAD_PATH}
-                bye
-                EOF
+                          sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<EOF
+                          get ${SFTP_REMOTE_PATH} ${LOCAL_DOWNLOAD_PATH}
+                          bye
+                          EOF
 
                 - exec:
                     command: bash
