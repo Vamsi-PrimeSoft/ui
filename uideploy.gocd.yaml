@@ -36,29 +36,31 @@ pipelines:
               timeout: 600
               resources:
                 - ubuntu-agent
-              environment_variables:
-                SFTP_HOST: ${SFTP_HOST}
-                SFTP_USER: ${SFTP_USER}
-                SFTP_REMOTE_PATH: ${SFTP_REMOTE_PATH}
-                LOCAL_DOWNLOAD_PATH: ${LOCAL_DOWNLOAD_PATH}
-                UNZIP_DESTINATION: ${UNZIP_DESTINATION}
-                FILE_OWNER: ${FILE_OWNER}
-                TARGET_HOST: ${TARGET_HOST}
               tasks:
                 - exec:
                     command: bash
                     arguments:
                       - -c
                       - |
+                        # Export environment variables
+                        export SFTP_HOST=172.16.7.121
+                        export SFTP_USER=ubuntu
+                        export SFTP_REMOTE_PATH=/home/ubuntu
+                        export LOCAL_DOWNLOAD_PATH=/var/go/downloads
+                        export UNZIP_DESTINATION=/var/www/html
+                        export FILE_OWNER=ubuntu:ubuntu
+                        export TARGET_HOST=192.168.56.126
+                        export NOTIFY_CHANNEL="#deployments"
+                        
                         echo "[INFO] Checking OS release:"
-                        cat /etc/os-release
+                        cat /etc/os-release || { echo "[ERROR] Failed to check OS release"; exit 1; }
                 - exec:
                     command: bash
                     arguments:
                       - -c
                       - |
                         echo "[INFO] Checking hostname:"
-                        hostname
+                        hostname || { echo "[ERROR] Failed to fetch hostname"; exit 1; }
                 - exec:
                     command: sudo
                     arguments:
@@ -75,6 +77,9 @@ pipelines:
                         get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}
                         bye
                         EOF
+                        if [ $? -ne 0 ]; then
+                          echo "[ERROR] Failed to download artifacts from SFTP"; exit 1;
+                        fi
                 - exec:
                     command: bash
                     arguments:
@@ -85,6 +90,9 @@ pipelines:
                         sudo chown ${FILE_OWNER} ${LOCAL_DOWNLOAD_PATH}/*.zip
                         sudo unzip -o ${LOCAL_DOWNLOAD_PATH}/*.zip -d ${UNZIP_DESTINATION}
                         sudo mv ${LOCAL_DOWNLOAD_PATH}/*.zip /home/ubuntu/ui-archive
+                        if [ $? -ne 0 ]; then
+                          echo "[ERROR] Failed to unzip artifacts"; exit 1;
+                        fi
                 - exec:
                     command: bash
                     arguments:
@@ -93,6 +101,9 @@ pipelines:
                         echo "[INFO] Updating environment configurations..."
                         sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/main*.js
                         sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/assets/environment/environment.json
+                        if [ $? -ne 0 ]; then
+                          echo "[ERROR] Failed to update environment configurations"; exit 1;
+                        fi
                 - exec:
                     command: sudo
                     arguments:
