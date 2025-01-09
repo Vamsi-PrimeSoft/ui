@@ -80,7 +80,7 @@ pipelines:
                         export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
                         export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
 
-                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<EOF
+                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<-EOF
                         get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}
                         bye
                         EOF
