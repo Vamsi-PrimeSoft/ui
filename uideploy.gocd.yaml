@@ -7,18 +7,13 @@ pipelines:
     display_order: -1
     materials:
       git-878c2de:
-        git: ${GIT_REPO_URL}
-        username: ${GIT_USERNAME}
+        git: https://github.com/Vamsi-PrimeSoft/ui.git
+        username: Vamsi-PrimeSoft
         shallow_clone: false
         auto_update: true
-        branch: ${GIT_BRANCH}
-        encrypted_password: ${GIT_ENCRYPTED_PASSWORD}
+        branch: main
+        encrypted_password: AES:CvqRgCac0f8DmOI58hCnLA==:lMJcCvSj3nsKR5i/qjAJUA==
     parameters:
-      baseUiUrl: "${BASE_UI_URL}"
-      gitRepoUrl: "https://github.com/Vamsi-PrimeSoft/ui.git"
-      gitUsername: "Vamsi-PrimeSoft"
-      gitBranch: "main"
-      gitEncryptedPassword: "AES:CvqRgCac0f8DmOI58hCnLA==:lMJcCvSj3nsKR5i/qjAJUA=="
       sftpHost: "172.16.7.121"
       sftpUser: "ubuntu"
       sftpKeyPath: "/var/go/.ssh/id_rsa"
