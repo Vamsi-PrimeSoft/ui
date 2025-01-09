@@ -14,13 +14,13 @@ pipelines:
         branch: main
         encrypted_password: AES:CvqRgCac0f8DmOI58hCnLA==:lMJcCvSj3nsKR5i/qjAJUA==
     variables:
-     SFTP_HOST: 172.16.7.121
-     SFTP_USER: ubuntu
-     SFTP_REMOTE_PATH: /home/ubuntu
-     LOCAL_DOWNLOAD_PATH: /var/go
-     UNZIP_DESTINATION: /var/www/html
-     FILE_OWNER: ubuntu:ubuntu
-     TARGET_HOST: 192.168.56.126
+      SFTP_HOST: 172.16.7.121
+      SFTP_USER: ubuntu
+      SFTP_REMOTE_PATH: /home/ubuntu
+      LOCAL_DOWNLOAD_PATH: /var/go
+      UNZIP_DESTINATION: /var/www/html
+      FILE_OWNER: ubuntu:ubuntu
+      TARGET_HOST: 192.168.56.126
     stages:
       - Deploy-Frontend:
           fetch_materials: true
@@ -39,6 +39,14 @@ pipelines:
                     arguments:
                       - -c
                       - |
+                        export SFTP_HOST=${SFTP_HOST}
+                        export SFTP_USER=${SFTP_USER}
+                        export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
+                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
+                        export UNZIP_DESTINATION=${UNZIP_DESTINATION}
+                        export FILE_OWNER=${FILE_OWNER}
+                        export TARGET_HOST=${TARGET_HOST}
+
                         echo "Checking OS release:"
                         cat /etc/os-release
                 - exec:
@@ -46,29 +54,45 @@ pipelines:
                     arguments:
                       - -c
                       - |
+                        export SFTP_HOST=${SFTP_HOST}
+                        export SFTP_USER=${SFTP_USER}
+                        export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
+                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
+                        export UNZIP_DESTINATION=${UNZIP_DESTINATION}
+                        export FILE_OWNER=${FILE_OWNER}
+                        export TARGET_HOST=${TARGET_HOST}
+
                         echo "Checking hostname:"
                         hostname
                 - exec:
-                      command: sudo
-                      arguments:
+                    command: sudo
+                    arguments:
                         - /bin/systemctl
                         - stop
                         - apache2.service
                 - exec:
-                      command: /bin/bash
-                      arguments:
-                        - -c
-                        - |
-                          sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<EOF
-                          get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}
-                          bye
-                          EOF
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - |
+                        export SFTP_HOST=${SFTP_HOST}
+                        export SFTP_USER=${SFTP_USER}
+                        export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
+                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
 
+                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<EOF
+                        get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}
+                        bye
+                        EOF
                 - exec:
                     command: bash
                     arguments:
                       - -c
                       - |
+                        export FILE_OWNER=${FILE_OWNER}
+                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
+                        export UNZIP_DESTINATION=${UNZIP_DESTINATION}
+
                         sudo chown ${FILE_OWNER} ${LOCAL_DOWNLOAD_PATH}/*.zip
                         sudo unzip -o ${LOCAL_DOWNLOAD_PATH}/*.zip -d ${UNZIP_DESTINATION}
                 - exec:
@@ -76,12 +100,14 @@ pipelines:
                     arguments:
                       - -c
                       - |
+                        export TARGET_HOST=${TARGET_HOST}
+                        export UNZIP_DESTINATION=${UNZIP_DESTINATION}
+
                         sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/main*.js
                         sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/assets/environment/environment.json
-
                 - exec:
-                      command: sudo
-                      arguments:
+                    command: sudo
+                    arguments:
                         - /bin/systemctl
                         - restart
                         - apache2.service
