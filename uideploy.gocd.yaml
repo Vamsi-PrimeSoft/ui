@@ -23,7 +23,7 @@ pipelines:
       UNZIP_DESTINATION: /var/www/html
       FILE_OWNER: ubuntu:ubuntu
       TARGET_HOST: 192.168.56.126
-      NOTIFY_CHANNEL: #deployments
+      NOTIFY_CHANNEL: "#deployments"
     stages:
       - Deploy-Frontend:
           fetch_materials: true
@@ -58,7 +58,7 @@ pipelines:
                       - stop
                       - apache2.service
                 - exec:
-                    command: /bin/bash
+                    command: bash
                     arguments:
                       - -c
                       - |
@@ -107,7 +107,8 @@ pipelines:
                 - exec:
                     command: curl
                     arguments:
-                      - -X POST
+                      - -X
+                      - POST
                       - -H
                       - "Content-Type: application/json"
                       - -d
