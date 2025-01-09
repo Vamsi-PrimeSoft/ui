@@ -76,8 +76,11 @@ pipelines:
                         export FILE_OWNER=ubuntu
                         export LOCAL_DOWNLOAD_PATH=/var/go
                         export UNZIP_DESTINATION=/var/www/html
+                        sudo rm -rf ${UNZIP_DESTINATION}/prime-square
                         sudo chown ${FILE_OWNER} ${LOCAL_DOWNLOAD_PATH}/*.zip
                         sudo unzip -o ${LOCAL_DOWNLOAD_PATH}/*.zip -d ${UNZIP_DESTINATION}
+                        sudo mv ${LOCAL_DOWNLOAD_PATH}/*.zip /home/ubuntu/ui-archive
+
                 - exec:
                     command: bash
                     arguments:
