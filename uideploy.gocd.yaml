@@ -13,14 +13,14 @@ pipelines:
         auto_update: true
         branch: main
         encrypted_password: AES:CvqRgCac0f8DmOI58hCnLA==:lMJcCvSj3nsKR5i/qjAJUA==
-    parameters:
-      sftpHost: "172.16.7.121"
-      sftpUser: "ubuntu"
-      sftpRemotePath: "/home/ubuntu/*.zip"
-      localDownloadPath: "/var/go"
-      unzipDestination: "/var/www/html"
-      fileOwner: "ubuntu:ubuntu"
-      targetHost: "192.168.56.126"
+    variables:
+     SFTP_HOST: 172.16.7.121
+     SFTP_USER: ubuntu
+     SFTP_REMOTE_PATH: /home/ubuntu
+     LOCAL_DOWNLOAD_PATH: /var/go
+     UNZIP_DESTINATION: /var/www/html
+     FILE_OWNER: ubuntu:ubuntu
+     TARGET_HOST: 192.168.56.126
     stages:
       - Deploy-Frontend:
           fetch_materials: true
@@ -32,7 +32,7 @@ pipelines:
             run-commands:
               timeout: 0
               resources:
-               - ubuntu-agent
+                - ubuntu-agent
               tasks:
                 - exec:
                     command: bash
@@ -60,7 +60,7 @@ pipelines:
                         - -c
                         - |
                           sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<EOF
-                          get ${SFTP_REMOTE_PATH} ${LOCAL_DOWNLOAD_PATH}
+                          get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}
                           bye
                           EOF
 
