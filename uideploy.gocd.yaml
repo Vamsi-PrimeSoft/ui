@@ -39,14 +39,6 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        export SFTP_HOST=${SFTP_HOST}
-                        export SFTP_USER=${SFTP_USER}
-                        export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
-                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
-                        export UNZIP_DESTINATION=${UNZIP_DESTINATION}
-                        export FILE_OWNER=${FILE_OWNER}
-                        export TARGET_HOST=${TARGET_HOST}
-
                         echo "Checking OS release:"
                         cat /etc/os-release
                 - exec:
@@ -54,14 +46,6 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        export SFTP_HOST=${SFTP_HOST}
-                        export SFTP_USER=${SFTP_USER}
-                        export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
-                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
-                        export UNZIP_DESTINATION=${UNZIP_DESTINATION}
-                        export FILE_OWNER=${FILE_OWNER}
-                        export TARGET_HOST=${TARGET_HOST}
-
                         echo "Checking hostname:"
                         hostname
                 - exec:
@@ -75,12 +59,12 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        export SFTP_HOST=${SFTP_HOST}
-                        export SFTP_USER=${SFTP_USER}
-                        export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
-                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
+                        export SFTP_HOST=172.16.7.121
+                        export SFTP_USER=ubuntu
+                        export SFTP_REMOTE_PATH=/home/ubuntu
+                        export LOCAL_DOWNLOAD_PATH=/var/go
 
-                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ubuntu@172.16.7.121 <<EOF
+                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<EOF
                         get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}
                         bye
                         EOF
@@ -89,10 +73,9 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        export FILE_OWNER=${FILE_OWNER}
-                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
-                        export UNZIP_DESTINATION=${UNZIP_DESTINATION}
-
+                        export FILE_OWNER=ubuntu
+                        export LOCAL_DOWNLOAD_PATH=/var/go
+                        export UNZIP_DESTINATION=/var/www/html
                         sudo chown ${FILE_OWNER} ${LOCAL_DOWNLOAD_PATH}/*.zip
                         sudo unzip -o ${LOCAL_DOWNLOAD_PATH}/*.zip -d ${UNZIP_DESTINATION}
                 - exec:
@@ -100,8 +83,8 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        export TARGET_HOST=${TARGET_HOST}
-                        export UNZIP_DESTINATION=${UNZIP_DESTINATION}
+                        export TARGET_HOST=192.168.56.126
+                        export UNZIP_DESTINATION=/var/www/html
 
                         sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/main*.js
                         sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/assets/environment/environment.json
