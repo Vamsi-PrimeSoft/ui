@@ -71,19 +71,25 @@ pipelines:
                         - stop
                         - apache2.service
                 - exec:
-                    command: /bin/bash
+                    command: bash
                     arguments:
-                      - -c
-                      - |
-                        export SFTP_HOST=${SFTP_HOST}
-                        export SFTP_USER=${SFTP_USER}
-                        export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
-                        export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
-
-                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<-EOF
-                        get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}
-                        bye
-                        EOF
+                        - -c
+                        - |
+                          export SFTP_HOST=${SFTP_HOST}
+                          export SFTP_USER=${SFTP_USER}
+                          export SFTP_REMOTE_PATH=${SFTP_REMOTE_PATH}
+                          export LOCAL_DOWNLOAD_PATH=${LOCAL_DOWNLOAD_PATH}
+      
+                          cat <<EOF > /tmp/sftp_script.sh
+                          sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} <<EOT
+                          get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}
+                          bye
+                          EOT
+                          EOF
+      
+                          chmod +x /tmp/sftp_script.sh
+                          /tmp/sftp_script.sh
+      
                 - exec:
                     command: bash
                     arguments:
