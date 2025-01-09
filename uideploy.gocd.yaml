@@ -42,6 +42,16 @@ pipelines:
                     arguments:
                       - -c
                       - |
+                        # Export environment variables
+                        export SFTP_HOST=172.16.7.121
+                        export SFTP_USER=ubuntu
+                        export SFTP_REMOTE_PATH=/home/ubuntu
+                        export LOCAL_DOWNLOAD_PATH=/var/go/downloads
+                        export UNZIP_DESTINATION=/var/www/html
+                        export FILE_OWNER=ubuntu:ubuntu
+                        export TARGET_HOST=192.168.56.126
+                        export NOTIFY_CHANNEL="#deployments"
+                        
                         echo "[INFO] Checking OS release:"
                         cat /etc/os-release || { echo "[ERROR] Failed to check OS release"; exit 1; }
                 - exec:
