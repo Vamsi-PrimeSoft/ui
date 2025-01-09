@@ -20,7 +20,6 @@ pipelines:
       sftpRemotePath: "/home/ubuntu/*.zip"
       localDownloadPath: "/var/go"
       unzipDestination: "/var/www/html"
-      apacheService: "apache2.service"
       fileOwner: "ubuntu:ubuntu"
       targetHost: "192.168.56.126"
     stages:
@@ -55,7 +54,7 @@ pipelines:
                       arguments:
                         - /bin/systemctl
                         - stop
-                        - ${APACHE_SERVICE}
+                        - apache2.service
                 - exec:
                     command: bash
                     arguments:
@@ -85,7 +84,7 @@ pipelines:
                       arguments:
                         - /bin/systemctl
                         - restart
-                        - ${APACHE_SERVICE}
+                        - apache2.service
                 - exec:
                     command: echo
                     arguments:
