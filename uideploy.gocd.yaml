@@ -56,14 +56,15 @@ pipelines:
                         - stop
                         - apache2.service
                 - exec:
-                    command: bash
-                    arguments:
-                      - -c
-                      - |
-                        sftp -o StrictHostKeyChecking=no -i ${SFTP_KEY_PATH} ${SFTP_USER}@${SFTP_HOST} <<EOF
-                        get ${SFTP_REMOTE_PATH} ${LOCAL_DOWNLOAD_PATH}
-                        bye
-                        EOF
+                      command: bash
+                      arguments:
+                        - -c
+                        - |
+                          sftp -o StrictHostKeyChecking=no -i ${SFTP_KEY_PATH} ${SFTP_USER}@${SFTP_HOST} <<EOF
+                get ${SFTP_REMOTE_PATH} ${LOCAL_DOWNLOAD_PATH}
+                bye
+                EOF
+
                 - exec:
                     command: bash
                     arguments:
