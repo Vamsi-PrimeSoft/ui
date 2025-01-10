@@ -1,13 +1,12 @@
----
 format_version: 10
 pipelines:
   test1:
     group: defaultGroup
     label_template: ${COUNT}
     lock_behavior: none
-    display_order: -1
+    display_order: 1
     materials:
-      git-df85cde:
+      git-frontend:
         git: https://github.com/Vamsi-PrimeSoft/ui.git
         username: Vamsi-PrimeSoft
         shallow_clone: false
@@ -15,21 +14,21 @@ pipelines:
         branch: main
         encrypted_password: AES:/nK7+PoOJoGLlBLT06j8pw==:WUvJ66uyHB46BwcCc3opNg==
     stages:
-      - name: Deploy-Frontend
-        fetch_materials: true
-        keep_artifacts: false
-        clean_workspace: true
-        approval:
-          type: manual
-        jobs:
-          - name: run-commands
-            timeout: 600
-            resources:
-              - ubuntu-agent
-            tasks:
-              - exec:
-                  command: echo
-                  arguments:
-                    - "#{myParam}"
-    parameters:
-      myParam: hello world
+      - Deploy-Frontend:
+          fetch_materials: true
+          keep_artifacts: false
+          clean_workspace: true
+          approval:
+            type: manual
+          jobs:
+            run-commands:
+              timeout: 600
+              resources:
+                - ubuntu-agent
+              tasks:
+                - exec:
+                    command: echo
+                    arguments: 
+                      - "#{myParam}"
+      parameters:
+        myParam: "hello world"
