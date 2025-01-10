@@ -31,71 +31,33 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        
-                        echo "[INFO] Checking OS release:"
-
+                        echo "[INFO] Checking OS release and hostname..."
                         cat /etc/os-release || { echo "[ERROR] Failed to check OS release"; exit 1; }
-                - exec:
-                    command: bash
-                    arguments:
-                      - -c
-                      - |
-                        echo "[INFO] Checking hostname:"
-
                         hostname || { echo "[ERROR] Failed to fetch hostname"; exit 1; }
-                - exec:
-                    command: sudo
-                    arguments:
-                      - /bin/systemctl
-                      - stop
-                      - apache2.service
-                - exec:
-                    command: |
-                      echo -e "get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}\nbye" | sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST}
-                - exec:
-                    command: bash
-                    arguments:
-                      - -c
-                      - |
+                        
+                        echo "[INFO] Stopping Apache service..."
+                        sudo systemctl stop apache2.service || { echo "[ERROR] Failed to stop Apache"; exit 1; }
+                        
+                        echo "[INFO] Downloading artifacts via SFTP..."
+                        echo -e "get ${SFTP_REMOTE_PATH}/*.zip ${LOCAL_DOWNLOAD_PATH}\nbye" | \
+                        sftp -o StrictHostKeyChecking=no -i /var/go/.ssh/id_rsa ${SFTP_USER}@${SFTP_HOST} || { echo "[ERROR] SFTP download failed"; exit 1; }
+                        
                         echo "[INFO] Unzipping artifacts..."
-
                         sudo rm -rf ${UNZIP_DESTINATION}/prime-square
-
                         sudo chown ${FILE_OWNER} ${LOCAL_DOWNLOAD_PATH}/*.zip
-
-                        sudo unzip -o ${LOCAL_DOWNLOAD_PATH}/*.zip -d ${UNZIP_DESTINATION}
-
+                        sudo unzip -o ${LOCAL_DOWNLOAD_PATH}/*.zip -d ${UNZIP_DESTINATION} || { echo "[ERROR] Failed to unzip artifacts"; exit 1; }
                         sudo mv ${LOCAL_DOWNLOAD_PATH}/*.zip /home/ubuntu/ui-archive
-
-                        if [ $? -ne 0 ]; then
-                          echo "[ERROR] Failed to unzip artifacts"
-                          exit 1
-                        fi
-                - exec:
-                    command: bash
-                    arguments:
-                      - -c
-                      - |
+                        
                         echo "[INFO] Updating environment configurations..."
-
-                        sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/main*.js
-
-                        sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/assets/environment/environment.json
-
-                        if [ $? -ne 0 ]; then
-                          echo "[ERROR] Failed to update environment configurations"
-                          exit 1
-                        fi
-                - exec:
-                    command: sudo
-                    arguments:
-                      - /bin/systemctl
-                      - restart
-                      - apache2.service
-                - exec:
-                    command: echo
-                    arguments:
-                      - Frontend deployment complete.
+                        sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/main*.js || \
+                        { echo "[ERROR] Failed to update main.js configurations"; exit 1; }
+                        sudo sed -i "s/ps-targethost:3804/${TARGET_HOST}/g" ${UNZIP_DESTINATION}/prime-square/assets/environment/environment.json || \
+                        { echo "[ERROR] Failed to update environment.json configurations"; exit 1; }
+                        
+                        echo "[INFO] Restarting Apache service..."
+                        sudo systemctl restart apache2.service || { echo "[ERROR] Failed to restart Apache"; exit 1; }
+                        
+                        echo "[INFO] Frontend deployment complete."
     parameters:
       SFTP_HOST: 172.16.7.121
       SFTP_USER: ubuntu
