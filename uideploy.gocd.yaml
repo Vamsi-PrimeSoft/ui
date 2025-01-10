@@ -56,7 +56,7 @@ pipelines:
                         bye
                         EOF
                 - exec:
-                    command: bash
+                    command: /bin/bash
                     arguments:
                       - -c
                       - |
@@ -65,7 +65,7 @@ pipelines:
                         sudo unzip -o "#{LOCAL_DOWNLOAD_PATH}"/*.zip" -d "#{UNZIP_DESTINATION}"
                         sudo mv "#{LOCAL_DOWNLOAD_PATH}"/*.zip" /home/ubuntu/ui-archive
                 - exec:
-                    command: bash
+                    command: /bin/bash
                     arguments:
                       - -c
                       - |
