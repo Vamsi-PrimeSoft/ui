@@ -13,7 +13,7 @@ pipelines:
         auto_update: true
         branch: main
         encrypted_password: AES:/nK7+PoOJoGLlBLT06j8pw==:WUvJ66uyHB46BwcCc3opNg==
-        stages:
+    stages:
       - name: my_stage
         jobs:
           - name: my_job
