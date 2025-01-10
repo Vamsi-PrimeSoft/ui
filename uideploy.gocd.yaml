@@ -85,7 +85,7 @@ pipelines:
                     arguments:
                       - "Frontend deployment complete."
     parameters:
-      SFTP_HOST: 172.16.7.121
+      SFTP_HOST: 172.16.7.120
       SFTP_USER: ubuntu
       SFTP_REMOTE_PATH: /home/ubuntu
       LOCAL_DOWNLOAD_PATH: /var/go
