@@ -51,8 +51,8 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        sftp -o StrictHostKeyChecking=no -i "#{LOCAL_DOWNLOAD_PATH}"/.ssh/id_rsa "#{SFTP_USER}"@"#{SFTP_HOST}" <<EOF
-                        get "#{SFTP_REMOTE_PATH}"/*.zip "#{LOCAL_DOWNLOAD_PATH}"
+                        sftp -o StrictHostKeyChecking=no -i "#{LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "#{SFTP_USER}@#{SFTP_HOST}" <<EOF
+                        get "#{SFTP_REMOTE_PATH}/*.zip" "#{LOCAL_DOWNLOAD_PATH}"
                         bye
                         EOF
                 - exec:
@@ -60,17 +60,22 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        sudo rm -rf "#{UNZIP_DESTINATION}"/prime-square
-                        sudo chown "#{FILE_OWNER}" "#{LOCAL_DOWNLOAD_PATH}"/*.zip
-                        sudo unzip -o "#{LOCAL_DOWNLOAD_PATH}"/*.zip" -d "#{UNZIP_DESTINATION}"
-                        sudo mv "#{LOCAL_DOWNLOAD_PATH}"/*.zip" /home/ubuntu/ui-archive
+                        if [ -f "#{LOCAL_DOWNLOAD_PATH}/*.zip" ]; then
+                          sudo rm -rf "#{UNZIP_DESTINATION}/prime-square"
+                          sudo chown "#{FILE_OWNER}" "#{LOCAL_DOWNLOAD_PATH}/*.zip"
+                          sudo unzip -o "#{LOCAL_DOWNLOAD_PATH}/*.zip" -d "#{UNZIP_DESTINATION}"
+                          sudo mv "#{LOCAL_DOWNLOAD_PATH}/*.zip" /home/ubuntu/ui-archive
+                        else
+                          echo "No zip files found in #{LOCAL_DOWNLOAD_PATH}"
+                          exit 1
+                        fi
                 - exec:
                     command: /bin/bash
                     arguments:
                       - -c
                       - |
-                        sudo sed -i "s/ps-targethost:3804/"#{TARGET_HOST}"/g" "#{UNZIP_DESTINATION}"/prime-square/main*.js
-                        sudo sed -i "s/ps-targethost:3804/"#{TARGET_HOST}"/g" "#{UNZIP_DESTINATION}"/prime-square/assets/environment/environment.json
+                        sudo sed -i "s/ps-targethost:3804/#{TARGET_HOST}/g" "#{UNZIP_DESTINATION}/prime-square/main*.js"
+                        sudo sed -i "s/ps-targethost:3804/#{TARGET_HOST}/g" "#{UNZIP_DESTINATION}/prime-square/assets/environment/environment.json"
                 - exec:
                     command: sudo
                     arguments:
@@ -82,10 +87,10 @@ pipelines:
                     arguments:
                       - "Frontend deployment complete."
     parameters:
-      SFTP_HOST: 172.16.7.121
-      SFTP_USER: ubuntu
-      SFTP_REMOTE_PATH: /home/ubuntu
-      LOCAL_DOWNLOAD_PATH: /var/go
-      UNZIP_DESTINATION: /var/www/html
-      FILE_OWNER: ubuntu:ubuntu
-      TARGET_HOST: 192.168.56.126
+      SFTP_HOST: "172.16.7.121"
+      SFTP_USER: "ubuntu"
+      SFTP_REMOTE_PATH: "/home/ubuntu"
+      LOCAL_DOWNLOAD_PATH: "/var/go"
+      UNZIP_DESTINATION: "/var/www/html"
+      FILE_OWNER: "ubuntu:ubuntu"
+      TARGET_HOST: "192.168.56.126"
