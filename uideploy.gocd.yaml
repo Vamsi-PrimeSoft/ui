@@ -1,3 +1,4 @@
+---
 format_version: 10
 pipelines:
   test1:
@@ -14,13 +15,21 @@ pipelines:
         branch: main
         encrypted_password: AES:/nK7+PoOJoGLlBLT06j8pw==:WUvJ66uyHB46BwcCc3opNg==
     stages:
-      - name: my_stage
+      - name: Deploy-Frontend
+        fetch_materials: true
+        keep_artifacts: false
+        clean_workspace: true
+        approval:
+          type: manual
         jobs:
-          - name: my_job
+          - name: run-commands
+            timeout: 600
+            resources:
+              - ubuntu-agent
             tasks:
               - exec:
                   command: echo
-                  arguments: 
+                  arguments:
                     - "#{myParam}"
     parameters:
-      myParam: "hello world"
+      myParam: hello world
