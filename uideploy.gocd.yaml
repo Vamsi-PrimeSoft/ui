@@ -51,14 +51,14 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        LATEST_ZIP=$(sftp -o StrictHostKeyChecking=no -i "#{LOCAL_DOWNLOAD_PATH}"/.ssh/id_rsa "#{SFTP_USER}"@"#{SFTP_HOST}" <<EOF
-                        ls -t "#{SFTP_REMOTE_PATH}"/*.zip
+                        LATEST_ZIP=$(sftp -o StrictHostKeyChecking=no -i "#{LOCAL_DOWNLOAD_PATH}"/.ssh/id_rsa "#{SFTP_USER}"@"#{SFTP_HOST}" <<EOF | grep -o '[^ ]*.zip' | tail -n 1
+                        ls -lt "#{SFTP_REMOTE_PATH}"/*.zip
                         bye
                         EOF
-                        | head -n 1 | awk '{print $NF}')
-                          
+                        )
+                        
                         sftp -o StrictHostKeyChecking=no -i "#{LOCAL_DOWNLOAD_PATH}"/.ssh/id_rsa "#{SFTP_USER}"@"#{SFTP_HOST}" <<EOF
-                        get "#{LATEST_ZIP}" "#{LOCAL_DOWNLOAD_PATH}"
+                        get "$LATEST_ZIP" "#{LOCAL_DOWNLOAD_PATH}"
                         bye
                         EOF
 
