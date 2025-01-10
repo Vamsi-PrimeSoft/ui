@@ -13,50 +13,14 @@ pipelines:
         auto_update: true
         branch: main
         encrypted_password: AES:/nK7+PoOJoGLlBLT06j8pw==:WUvJ66uyHB46BwcCc3opNg==
-    stages:
-    - test:
-        fetch_materials: true
-        keep_artifacts: false
-        clean_workspace: false
-        approval:
-          type: success
-          allow_only_on_success: false
+        stages:
+      - name: my_stage
         jobs:
-          unit:
-            timeout: 0
+          - name: my_job
             tasks:
-            - exec:
-                arguments:
-                - rm
-                - -rf
-                - ${UNZIP_DESTINATION}/prime-square
-                command: sudo
-                run_if: passed
-            - exec:
-                arguments:
-                - chown
-                - ${FILE_OWNER}
-                - ${LOCAL_DOWNLOAD_PATH}/*.zip
-                command: sudo
-                run_if: passed
-            - exec:
-                arguments:
-                - unzip
-                - -o
-                - ${LOCAL_DOWNLOAD_PATH}/*.zip
-                - -d
-                - ${UNZIP_DESTINATION}
-                command: sudo
-                run_if: passed
-            - exec:
-                arguments:
-                - mv
-                - ${LOCAL_DOWNLOAD_PATH}/*.zip
-                - /home/ubuntu/ui-archive
-                command: sudo
-                run_if: passed
+              - exec:
+                  command: echo
+                  arguments: 
+                    - "#{myParam}"
     parameters:
-      UiUrl: 192.168.0.1
-      FILE_OWNER: ubuntu:ubuntu
-      LOCAL_DOWNLOAD_PATH: /var/go/downloads
-      UNZIP_DESTINATION: /var/www/html
+      myParam: "hello world"
