@@ -14,21 +14,21 @@ pipelines:
         branch: main
         encrypted_password: AES:/nK7+PoOJoGLlBLT06j8pw==:WUvJ66uyHB46BwcCc3opNg==
     stages:
-      - Deploy-Frontend:
-          fetch_materials: true
-          keep_artifacts: false
-          clean_workspace: true
-          approval:
-            type: manual
-          jobs:
-            run-commands:
-              timeout: 600
-              resources:
-                - ubuntu-agent
-              tasks:
-                - exec:
-                    command: echo
-                    arguments: 
-                      - "#{myParam}"
-      parameters:
-        myParam: "hello world"
+      - name: Deploy-Frontend
+        fetch_materials: true
+        keep_artifacts: false
+        clean_workspace: true
+        approval:
+          type: manual
+        jobs:
+          - name: run-commands
+            timeout: 600
+            resources:
+              - ubuntu-agent
+            tasks:
+              - exec:
+                  command: echo
+                  arguments: 
+                    - "#{myParam}"
+    parameters:
+      myParam: "hello world"
