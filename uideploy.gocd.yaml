@@ -1,34 +1,91 @@
 format_version: 10
 pipelines:
-  test1:
+  UI-CD-YAML:
     group: defaultGroup
     label_template: ${COUNT}
     lock_behavior: none
-    display_order: 1
+    display_order: -1
     materials:
-      git-frontend:
+      git-878c2de:
         git: https://github.com/Vamsi-PrimeSoft/ui.git
         username: Vamsi-PrimeSoft
         shallow_clone: false
         auto_update: true
         branch: main
-        encrypted_password: AES:/nK7+PoOJoGLlBLT06j8pw==:WUvJ66uyHB46BwcCc3opNg==
+        encrypted_password: AES:CvqRgCac0f8DmOI58hCnLA==:lMJcCvSj3nsKR5i/qjAJUA==
     stages:
       - Deploy-Frontend:
           fetch_materials: true
           keep_artifacts: false
-          clean_workspace: true
+          clean_workspace: false
           approval:
             type: manual
           jobs:
             run-commands:
-              timeout: 600
+              timeout: 0
               resources:
                 - ubuntu-agent
               tasks:
                 - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "Checking OS release:"
+                        cat /etc/os-release
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "Checking hostname:"
+                        hostname
+                - exec:
+                    command: sudo
+                    arguments:
+                      - /bin/systemctl
+                      - stop
+                      - apache2.service
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - |
+                        sftp -o StrictHostKeyChecking=no -i "#{LOCAL_DOWNLOAD_PATH}"/.ssh/id_rsa "#{SFTP_USER}"@"#{SFTP_HOST}" <<EOF
+                        get "#{SFTP_REMOTE_PATH}"/*.zip "#{LOCAL_DOWNLOAD_PATH}"
+                        bye
+                        EOF
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        sudo rm -rf "#{UNZIP_DESTINATION}"/prime-square
+                        sudo chown "#{FILE_OWNER}" "#{LOCAL_DOWNLOAD_PATH}"/*.zip
+                        sudo unzip -o "#{LOCAL_DOWNLOAD_PATH}"/*.zip" -d "#{UNZIP_DESTINATION}"
+                        sudo mv "#{LOCAL_DOWNLOAD_PATH}"/*.zip" /home/ubuntu/ui-archive
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        sudo sed -i "s/ps-targethost:3804/"#{TARGET_HOST}"/g" "#{UNZIP_DESTINATION}"/prime-square/main*.js
+                        sudo sed -i "s/ps-targethost:3804/"#{TARGET_HOST}"/g" "#{UNZIP_DESTINATION}"/prime-square/assets/environment/environment.json
+                - exec:
+                    command: sudo
+                    arguments:
+                      - /bin/systemctl
+                      - restart
+                      - apache2.service
+                - exec:
                     command: echo
-                    arguments: 
-                      - "#{myParam}"
+                    arguments:
+                      - "Frontend deployment complete."
     parameters:
-      myParam: "hello world"
+      SFTP_HOST: 172.16.7.121
+      SFTP_USER: ubuntu
+      SFTP_REMOTE_PATH: /home/ubuntu
+      LOCAL_DOWNLOAD_PATH: /var/go
+      UNZIP_DESTINATION: /var/www/html
+      FILE_OWNER: ubuntu:ubuntu
+      TARGET_HOST: 192.168.56.126
