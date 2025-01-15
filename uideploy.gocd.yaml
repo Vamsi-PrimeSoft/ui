@@ -52,6 +52,8 @@ pipelines:
                       - -c
                       - |
                         sftp -o StrictHostKeyChecking=no -i "#{LOCAL_DOWNLOAD_PATH}"/.ssh/id_rsa "#{SFTP_USER}"@"#{SFTP_HOST}" <<EOF
+                        cd "#{SFTP_REMOTE_PATH}"
+                        lcd "#{LOCAL_DOWNLOAD_PATH}"
                         get #{GET_FILE}
                         bye
                         EOF
