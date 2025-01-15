@@ -51,8 +51,8 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        chmod +x /var/lib/go-agent/fetch_latest_zip.sh
-                        ./var/lib/go-agent/fetch_latest_zip.sh "#{SFTP_HOST}" "#{SFTP_USER}" "#{SFTP_REMOTE_PATH}" "#{LOCAL_DOWNLOAD_PATH}" "#{LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "#{GET_FILE}"
+                        chmod +x /var/lib/go-agent/get.sh
+                        ./var/lib/go-agent/get.sh "#{SFTP_HOST}" "#{SFTP_USER}" "#{SFTP_REMOTE_PATH}" "#{LOCAL_DOWNLOAD_PATH}" "#{LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "#{GET_FILE}"
                 - exec:
                     command: /bin/bash
                     arguments:
