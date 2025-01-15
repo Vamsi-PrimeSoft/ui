@@ -1,30 +1,15 @@
 #!/bin/bash
 
-# Variables (pass these as arguments to the script)
-SFTP_HOST="$1"
-SFTP_USER="$2"
-SFTP_REMOTE_PATH="$3"
-LOCAL_DOWNLOAD_PATH="$4"
-PRIVATE_KEY="$5"
-GET_FILE="$6"
+# Define your variables
+LOCAL_DOWNLOAD_PATH="/var/go"
+SFTP_USER="ubuntu"
+SFTP_HOST="172.16.7.120"
+SFTP_REMOTE_PATH="/home/ubuntu"
 
-# Ensure all variables are provided
-if [[ -z "$SFTP_HOST" || -z "$SFTP_USER" || -z "$SFTP_REMOTE_PATH" || -z "$LOCAL_DOWNLOAD_PATH" || -z "$PRIVATE_KEY" || -z "$GET_FILE" ]]; then
-    echo "Usage: $0 <SFTP_HOST> <SFTP_USER> <SFTP_REMOTE_PATH> <LOCAL_DOWNLOAD_PATH> <PRIVATE_KEY> <GET_FILE>"
-    exit 1
-fi
-
-# Perform the SFTP operation
-sftp -o StrictHostKeyChecking=no -i "$PRIVATE_KEY" "$SFTP_USER@$SFTP_HOST" <<EOF
-cd "$SFTP_REMOTE_PATH"
-lcd "$LOCAL_DOWNLOAD_PATH"
-get $GET_FILE
+# Execute the SFTP command
+sftp -o StrictHostKeyChecking=no -i "${LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "${SFTP_USER}@${SFTP_HOST}" <<EOF
+cd "${SFTP_REMOTE_PATH}"
+lcd "${LOCAL_DOWNLOAD_PATH}"
+get \$(ls -t *.zip | head -n 1)
 bye
 EOF
-
-if [[ $? -eq 0 ]]; then
-    echo "File $GET_FILE successfully downloaded to $LOCAL_DOWNLOAD_PATH"
-else
-    echo "Failed to download $GET_FILE"
-    exit 1
-fi
