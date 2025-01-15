@@ -9,9 +9,10 @@ SFTP_USER="ubuntu"
 SFTP_HOST="172.16.7.120"
 SFTP_REMOTE_PATH="/home/ubuntu"
 
+# Echo the status
 echo "Checking for .zip files in the remote path: ${SFTP_REMOTE_PATH}"
 
-# Get the list of .zip files from the remote server and clean the output
+# Get the list of .zip files from the remote server
 REMOTE_LIST=$(sftp -o StrictHostKeyChecking=no -i "${LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "${SFTP_USER}@${SFTP_HOST}" <<EOF
 cd "${SFTP_REMOTE_PATH}"
 ls -t *.zip
@@ -45,8 +46,6 @@ if [ -z "$LATEST_FILE" ]; then
   exit 1
 fi
 
-echo "Latest file: $LATEST_FILE"
-
 # Enable debugging for downloading the file
 set -x
 
@@ -61,4 +60,24 @@ EOF
 # Disable debugging
 set +x
 
-echo "Download complete."
+# Print confirmation that download is complete
+echo "Download complete for ${LATEST_FILE}"
+
+# Now, proceed with further operations (e.g., extracting and moving the .zip file)
+echo "Processing downloaded .zip files..."
+
+# Check if any .zip files exist in /var/go/
+if ls /var/go/*.zip 1> /dev/null 2>&1; then
+  # Remove the prime-square directory (if necessary)
+  sudo rm -rf "/var/www/html/prime-square"
+
+  # Ensure the .zip files exist and then proceed with chown, unzip, and mv
+  sudo chown "ubuntu:ubuntu" /var/go/*.zip
+  sudo unzip -o /var/go/*.zip -d "/var/www/html"
+  sudo mv /var/go/*.zip /home/ubuntu/ui-archive
+
+  echo "Processing completed successfully."
+else
+  echo "No .zip files found in ${LOCAL_DOWNLOAD_PATH}. Please check the download step."
+  exit 1
+fi
