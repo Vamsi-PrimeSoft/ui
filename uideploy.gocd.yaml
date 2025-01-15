@@ -51,8 +51,8 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        chmod +x /var/lib/go-agent/pipelines/UI-CD-YAML/get.sh
-                        ./var/lib/go-agent/pipelines/UI-CD-YAML/get.sh "#{SFTP_HOST}" "#{SFTP_USER}" "#{SFTP_REMOTE_PATH}" "#{LOCAL_DOWNLOAD_PATH}" "#{LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "#{GET_FILE}"
+                        chmod +x ./get.sh
+                        ./get.sh "#{SFTP_HOST}" "#{SFTP_USER}" "#{SFTP_REMOTE_PATH}" "#{LOCAL_DOWNLOAD_PATH}" "#{LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "#{GET_FILE}"
                 - exec:
                     command: /bin/bash
                     arguments:
