@@ -51,12 +51,11 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        sftp -o StrictHostKeyChecking=no -i "#{LOCAL_DOWNLOAD_PATH}"/.ssh/id_rsa "#{SFTP_USER}"@"#{SFTP_HOST}" <<EOF
-                        cd "#{SFTP_REMOTE_PATH}"
-                        lcd "#{LOCAL_DOWNLOAD_PATH}"
-                        get #{GET_FILE}
-                        bye
-                        EOF
+                        # Ensure the script is executable
+                        chmod +x ./fetch_latest_zip.sh
+
+                        # Run the script with required arguments
+                        ./fetch_latest_zip.sh "#{SFTP_HOST}" "#{SFTP_USER}" "#{SFTP_REMOTE_PATH}" "#{LOCAL_DOWNLOAD_PATH}" "#{LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "#{GET_FILE}"
                 - exec:
                     command: /bin/bash
                     arguments:
@@ -91,4 +90,4 @@ pipelines:
       UNZIP_DESTINATION: /var/www/html
       FILE_OWNER: ubuntu:ubuntu
       TARGET_HOST: 192.168.56.126
-      GET_FILE: ls -t *.zip | head -n 1
+      GET_FILE: "ls -t *.zip | head -n 1"
