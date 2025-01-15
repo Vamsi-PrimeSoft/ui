@@ -11,7 +11,7 @@ SFTP_REMOTE_PATH="/home/ubuntu"
 
 echo "Checking for .zip files in the remote path: ${SFTP_REMOTE_PATH}"
 
-# Get the list of .zip files from the remote server and debug the output
+# Get the list of .zip files from the remote server and clean the output
 REMOTE_LIST=$(sftp -o StrictHostKeyChecking=no -i "${LOCAL_DOWNLOAD_PATH}/.ssh/id_rsa" "${SFTP_USER}@${SFTP_HOST}" <<EOF
 cd "${SFTP_REMOTE_PATH}"
 ls -t *.zip
@@ -22,12 +22,15 @@ EOF
 # Disable debugging temporarily
 set +x
 
-# Print the raw output from the SFTP command
-echo "Raw output from SFTP 'ls' command:"
-echo "${REMOTE_LIST}"
+# Clean the output to remove sftp command prompts and extract only filenames
+CLEANED_LIST=$(echo "${REMOTE_LIST}" | sed -n '/.zip$/p' | sed 's/^.* \([^ ]\+\.zip\)$/\1/')
 
-# Extract the latest .zip file from the list
-LATEST_FILE=$(echo "${REMOTE_LIST}" | grep -oE '^[^ ]+\.zip$' | head -n 1)
+# Print the cleaned list
+echo "Cleaned list of .zip files:"
+echo "${CLEANED_LIST}"
+
+# Extract the latest .zip file from the cleaned list
+LATEST_FILE=$(echo "${CLEANED_LIST}" | head -n 1)
 
 # Print the extracted file name
 echo "Extracted latest file: ${LATEST_FILE}"
