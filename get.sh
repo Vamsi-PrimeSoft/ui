@@ -28,7 +28,7 @@ echo "Raw output from sftp command:"
 echo "${REMOTE_LIST}"
 
 # Clean the output to remove sftp command prompts and extract only filenames
-CLEANED_LIST=$(echo "${REMOTE_LIST}" | grep -oE '^\S+\.zip$')
+CLEANED_LIST=$(echo "${REMOTE_LIST}" | grep -oE 'ps_ui_[0-9.]+_iifl_[0-9.]+-[a-z0-9]+-[0-9]+\.zip')
 
 # Print the cleaned list of .zip files
 echo "Cleaned list of .zip files:"
