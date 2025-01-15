@@ -28,7 +28,7 @@ echo "Raw output from sftp command:"
 echo "${REMOTE_LIST}"
 
 # Clean the output to remove sftp command prompts and extract only filenames
-CLEANED_LIST=$(echo "${REMOTE_LIST}" | sed -n '/.zip$/p' | sed 's/^\s*\([^ ]\+\.zip\)$/\1/')
+CLEANED_LIST=$(echo "${REMOTE_LIST}" | grep -oE '^\S+\.zip$')
 
 # Print the cleaned list of .zip files
 echo "Cleaned list of .zip files:"
